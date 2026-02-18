@@ -15,4 +15,4 @@ jobs:
       contents: read
       pull-requests: write
     with:
-      parameters_file_name: config/tenants/test/platform.json
+      parameters_file_name: config/platform.json
