@@ -12,7 +12,7 @@ param parEnableTelemetry = true
 param intRootConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'alz'
-  managementGroupParentId: 'c785e463-29cf-46e6-9b1d-ae17db0a6ac4'
+  managementGroupParentId: '3aadcd6c-3c4c-49bc-a9d5-57b7fbf31db7'
   managementGroupDisplayName: 'Azure Landing Zones'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -35,7 +35,7 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-MDFC-Config-H224': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/0fbc92c2-828a-4fff-917c-487bf299d344/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
       }
       emailSecurityContact: {
         value: 'security@yourcompany.com'
@@ -51,7 +51,7 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-AzActivity-Log': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/0fbc92c2-828a-4fff-917c-487bf299d344/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
       }
       logsEnabled: {
         value: 'True'
@@ -61,7 +61,7 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-Diag-LogsCat': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/0fbc92c2-828a-4fff-917c-487bf299d344/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
       }
     }
   }
@@ -86,7 +86,7 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-AzSqlDb-Auditing': {
     parameters: {
       logAnalyticsWorkspaceResourceId: {
-        value: '/subscriptions/0fbc92c2-828a-4fff-917c-487bf299d344/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
       }
     }
   }
