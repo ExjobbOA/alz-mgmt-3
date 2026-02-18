@@ -1,4 +1,4 @@
-using '../../../../../../platform/templates/core/governance/mgmt-groups/int-root/main.bicep'
+using '../../../../platform/templates/core/governance/mgmt-groups/int-root/main.bicep'
 
 
 
