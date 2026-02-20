@@ -3,6 +3,7 @@ using '../../../../../../platform/templates/core/governance/mgmt-groups/platform
 // General Parameters
 param parLocations = [
   'swedencentral'
+  'northeurope'
 ]
 param parEnableTelemetry = true
 
