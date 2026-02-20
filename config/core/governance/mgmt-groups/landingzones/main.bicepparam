@@ -3,7 +3,7 @@ using '../../../../../platform/templates/core/governance/mgmt-groups/landingzone
 // General Parameters
 param parLocations = [
   'swedencentral'
-  ''
+  'northeurope'
 ]
 param parEnableTelemetry = true
 
