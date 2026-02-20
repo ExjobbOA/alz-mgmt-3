@@ -3,7 +3,7 @@ using '../../../../../../platform/templates/core/governance/mgmt-groups/platform
 // General Parameters
 param parLocations = [
   'swedencentral'
-  ''
+  'northeurope'
 ]
 param parEnableTelemetry = true
 
@@ -20,7 +20,7 @@ param platformIdentityConfig = {
   customerPolicyDefs: []
   customerPolicySetDefs: []
   customerPolicyAssignments: []
-  subscriptionsToPlaceInManagementGroup: ['6f051987-3995-4c82-abb3-90ba101a0ab4']
+  subscriptionsToPlaceInManagementGroup: []
   waitForConsistencyCounterBeforeCustomPolicyDefinitions: 10
   waitForConsistencyCounterBeforeCustomPolicySetDefinitions: 10
   waitForConsistencyCounterBeforeCustomRoleDefinitions: 10
