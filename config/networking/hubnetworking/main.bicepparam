@@ -12,7 +12,6 @@ param parGlobalResourceLock = {
 }
 param parTags = {}
 param parEnableTelemetry = true
-param parEnableDdos = false
 
 // Resource Group Parameters
 param parHubNetworkingResourceGroupNamePrefix = 'rg-alz-conn'
