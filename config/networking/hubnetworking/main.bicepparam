@@ -94,7 +94,7 @@ param hubNetworks = [
       name: 'ergw-alz-${parLocations[0]}'
     }
     privateDnsSettings: {
-      deployPrivateDnsZones: true
+      deployPrivateDnsZones: false
       deployDnsPrivateResolver: false
       privateDnsResolverName: 'dnspr-alz-${parLocations[0]}'
       privateDnsZones: []
@@ -178,7 +178,7 @@ param hubNetworks = [
       name: 'ergw-alz-${parLocations[1]}'
     }
     privateDnsSettings: {
-      deployPrivateDnsZones: true
+      deployPrivateDnsZones: false
       deployDnsPrivateResolver: false
       privateDnsResolverName: 'dnspr-alz-${parLocations[1]}'
       privateDnsZones: [
