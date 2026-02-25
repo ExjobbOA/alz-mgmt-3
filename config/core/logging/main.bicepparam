@@ -1,9 +1,18 @@
 using '../../../platform/templates/core/logging/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var rgLogging         = 'rg-alz-logging-${location}'
+var lawName           = 'law-alz-${location}'
+var uamiName          = 'uami-alz-${location}'
+var dcrChangeTracking = 'dcr-alz-changetracking-${location}'
+var dcrVmInsights     = 'dcr-alz-vminsights-${location}'
+var dcrMdfcSql        = 'dcr-alz-mdfcsql-${location}'
+
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
 param parGlobalResourceLock = {
   name: 'GlobalResourceLock'
@@ -11,22 +20,22 @@ param parGlobalResourceLock = {
   notes: 'This lock was created by the ALZ Bicep Accelerator.'
 }
 param parTags = {}
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 // Resource Group Parameters
-param parMgmtLoggingResourceGroup = 'rg-alz-logging-${parLocations[0]}'
+param parMgmtLoggingResourceGroup = rgLogging
 
 // Automation Account Parameters
-param parAutomationAccountName = 'aa-alz-${parLocations[0]}'
-param parAutomationAccountLocation = parLocations[0]
+param parAutomationAccountName = 'aa-alz-${location}'
+param parAutomationAccountLocation = location
 param parDeployAutomationAccount = false
 param parAutomationAccountUseManagedIdentity = true
 param parAutomationAccountPublicNetworkAccess = true
 param parAutomationAccountSku = 'Basic'
 
 // Log Analytics Workspace Parameters
-param parLogAnalyticsWorkspaceName = 'law-alz-${parLocations[0]}'
-param parLogAnalyticsWorkspaceLocation = parLocations[0]
+param parLogAnalyticsWorkspaceName = lawName
+param parLogAnalyticsWorkspaceLocation = location
 param parLogAnalyticsWorkspaceSku = 'PerGB2018'
 param parLogAnalyticsWorkspaceCapacityReservationLevel = 100
 param parLogAnalyticsWorkspaceLogRetentionInDays = 365
@@ -40,7 +49,7 @@ param parLogAnalyticsWorkspaceSolutions = [
 ]
 
 // Data Collection Rule Parameters
-param parUserAssignedIdentityName = 'mi-alz-${parLocations[0]}'
-param parDataCollectionRuleVMInsightsName = 'dcr-vmi-alz-${parLocations[0]}'
-param parDataCollectionRuleChangeTrackingName = 'dcr-ct-alz-${parLocations[0]}'
-param parDataCollectionRuleMDFCSQLName = 'dcr-mdfcsql-alz-${parLocations[0]}'
+param parUserAssignedIdentityName = uamiName
+param parDataCollectionRuleVMInsightsName = dcrVmInsights
+param parDataCollectionRuleChangeTrackingName = dcrChangeTracking
+param parDataCollectionRuleMDFCSQLName = dcrMdfcSql

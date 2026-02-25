@@ -9,6 +9,8 @@
   "LOCATION": "swedencentral",
   "LOCATION_PRIMARY": "swedencentral",
   "MANAGEMENT_GROUP_ID": "3aadcd6c-3c4c-49bc-a9d5-57b7fbf31db7",
-  "LOCATION_SECONDARY": "",
-  "SUBSCRIPTION_ID_SECURITY": "6f051987-3995-4c82-abb3-90ba101a0ab4"
+  "LOCATION_SECONDARY": "northeurope",
+  "SUBSCRIPTION_ID_SECURITY": "6f051987-3995-4c82-abb3-90ba101a0ab4",
+  "ENABLE_TELEMETRY": "true",
+  "SECURITY_CONTACT_EMAIL": ""
 }

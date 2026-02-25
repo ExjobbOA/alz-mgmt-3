@@ -8,10 +8,6 @@
 
 This platform is a work-in-progress thesis project. The high-level architecture (dual-repo split, Deployment Stacks, OIDC auth, ALZ policy library) is settled. The implementation details — file structure, parameter patterns, workflow steps — are actively evolving.
 
-**Planned changes include:**
-- Moving to a centralized parameters file that populates all other `.bicepparam` files, replacing the current per-scope parameter sprawl
-- Further workflow consolidation and refactoring
-
 **When working in this codebase:** Trust the architectural patterns described below, but always read the actual code for current details. If something in this doc contradicts what you see in the files, the files win. Check `records.md` in the templates repo for the latest architecture decisions and troubleshooting history.
 
 ## Architecture Overview
@@ -69,24 +65,70 @@ alz-mgmt/
 
 ## Key Configuration: platform.json
 
-This JSON file is loaded by GitHub Actions and exported as environment variables:
-- `LOCATION` / `LOCATION_PRIMARY`: `swedencentral`
-- `INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID`: `alz`
+**`platform.json` is the only file a tenant operator should ever need to edit.** The `bicep-variables` CI action exports all keys as environment variables before any deployment step, and every `.bicepparam` file reads from those env vars at compile time via `readEnvironmentVariable()`.
+
+Fields:
+- `LOCATION` / `LOCATION_PRIMARY`: primary Azure region (e.g. `swedencentral`)
+- `LOCATION_SECONDARY`: secondary region (e.g. `northeurope`), or `""` for single-region
+- `INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID`: `alz` (or your chosen root MG name)
 - `MANAGEMENT_GROUP_ID`: the tenant root MG GUID
-- `SUBSCRIPTION_ID_MANAGEMENT`, `SUBSCRIPTION_ID_CONNECTIVITY`, etc.: platform subscription IDs
+- `SUBSCRIPTION_ID_MANAGEMENT`, `SUBSCRIPTION_ID_CONNECTIVITY`, `SUBSCRIPTION_ID_IDENTITY`, `SUBSCRIPTION_ID_SECURITY`: platform subscription IDs
 - `NETWORK_TYPE`: `none` | `hubnetworking` | `virtualwan`
+- `ENABLE_TELEMETRY`: `true` | `false`
+- `SECURITY_CONTACT_EMAIL`: email for MDFC/service health alerts (can be empty)
+
+### Changing the deployment region
+Update `LOCATION` and `LOCATION_PRIMARY` (and optionally `LOCATION_SECONDARY`) in `platform.json`. All resource names and IDs are derived from these values in var blocks — no other files need editing.
 
 ## How .bicepparam Files Work
 
-Every `.bicepparam` file starts with a `using` declaration pointing to a template in the engine repo:
+Every `.bicepparam` file starts with a `using` declaration pointing to a template in the engine repo, followed by a `var` block that reads from env vars:
 ```bicep
 using '../../platform/templates/core/governance/mgmt-groups/int-root/main.bicep'
+
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+// ... derived resource IDs built from these vars
 ```
-The `../../platform/` prefix maps to the templates repo checkout path in CI.
+
+The `../../platform/` prefix maps to the templates repo checkout path in CI. Params reference only vars — no hardcoded subscription IDs or location strings anywhere (except ALZ architectural constants like MG names).
 
 ### Important: Policy Parameter Overrides
 
 The `int-root.bicepparam` file uses `parPolicyAssignmentParameterOverrides` to inject environment-specific values (Log Analytics workspace IDs, email contacts, etc.) into ALZ policy assignments. This is the primary customization mechanism — it overrides default values from the JSON policy library without modifying the templates repo.
+
+### VS Code false positives
+
+The VS Code Bicep extension shows errors on `var` blocks and `readEnvironmentVariable()` calls in `.bicepparam` files. These are **false positives** — the extension language server can't resolve the `using` target locally. The Bicep CLI (0.40.2+) compiles these files correctly. Ignore the IDE squiggles.
+
+### Local development: running bicep build
+
+`readEnvironmentVariable()` resolves at compile time, so env vars must be set before running `az bicep build-params`. Use this PowerShell snippet from the repo root:
+
+```powershell
+# Load platform.json into env vars
+$p = Get-Content config/platform.json | ConvertFrom-Json
+$p.PSObject.Properties | ForEach-Object {
+    [System.Environment]::SetEnvironmentVariable($_.Name, [string]$_.Value, 'Process')
+}
+
+# Build all .bicepparam files
+Get-ChildItem -Path config -Recurse -Filter *.bicepparam | ForEach-Object {
+    Write-Host "=== $($_.FullName) ===" -ForegroundColor Cyan
+    az bicep build-params --file $_.FullName 2>&1
+}
+```
+
+Or in bash (Git Bash / WSL):
+```bash
+eval $(cat config/platform.json | \
+  sed 's/[{}]//g; s/,//g; s/"//g; s/: /=/g; s/^ */export /g' | \
+  grep -v '^export $')
+find config -name "*.bicepparam" | sort | xargs -I{} az bicep build-params --file {}
+```
+
+Expected: only `BCP091` errors (missing `using` target — the templates repo isn't checked out locally). Any other error indicates a real problem.
 
 ## CI/CD Pipeline
 
@@ -148,7 +190,7 @@ When writing `.bicepparam` files, always check the template being referenced (`u
 Edit `config/core/governance/mgmt-groups/int-root.bicepparam` and add/modify the key in `parPolicyAssignmentParameterOverrides`.
 
 ### Changing the deployment region
-Update `LOCATION` and `LOCATION_PRIMARY` in `config/platform.json` and adjust any hardcoded `swedencentral` references in `.bicepparam` files.
+Update `LOCATION`, `LOCATION_PRIMARY` (and optionally `LOCATION_SECONDARY`) in `config/platform.json`. All `.bicepparam` files derive resource names from these env vars — no other edits needed.
 
 ## Known Gotchas
 

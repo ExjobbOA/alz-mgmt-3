@@ -1,9 +1,12 @@
 using '../../../platform/templates/networking/hubnetworking/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+
 param parLocations = [
-  'swedencentral'
-  'northeurope'
+  location
+  locationSecondary
 ]
 param parGlobalResourceLock = {
   name: 'GlobalResourceLock'
@@ -11,7 +14,7 @@ param parGlobalResourceLock = {
   notes: 'This lock was created by the ALZ Bicep Accelerator.'
 }
 param parTags = {}
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 // Resource Group Parameters
 param parHubNetworkingResourceGroupNamePrefix = 'rg-alz-conn'
@@ -21,8 +24,8 @@ param parDnsPrivateResolverResourceGroupNamePrefix = 'rg-alz-dnspr'
 // Hub Networking Parameters
 param hubNetworks = [
   {
-    name: 'vnet-alz-${parLocations[0]}'
-    location: parLocations[0]
+    name: 'vnet-alz-${location}'
+    location: location
     addressPrefixes: [
       '10.0.0.0/22'
     ]
@@ -30,7 +33,7 @@ param hubNetworks = [
     dnsServers: []
     peeringSettings: [
       {
-        remoteVirtualNetworkName: 'vnet-alz-${parLocations[1]}'
+        remoteVirtualNetworkName: 'vnet-alz-${locationSecondary}'
         allowForwardedTraffic: true
         allowGatewayTransit: false
         allowVirtualNetworkAccess: true
@@ -67,23 +70,23 @@ param hubNetworks = [
     ]
     azureFirewallSettings: {
       deployAzureFirewall: false
-      azureFirewallName: 'afw-alz-${parLocations[0]}'
+      azureFirewallName: 'afw-alz-${location}'
       azureSkuTier: 'Standard'
       publicIPAddressObject: {
-        name: 'pip-afw-alz-${parLocations[0]}'
+        name: 'pip-afw-alz-${location}'
       }
       managementIPAddressObject: {
-        name: 'pip-afw-mgmt-alz-${parLocations[0]}'
+        name: 'pip-afw-mgmt-alz-${location}'
       }
     }
     bastionHostSettings: {
       deployBastion: false
-      bastionHostSettingsName: 'bas-alz-${parLocations[0]}'
+      bastionHostSettingsName: 'bas-alz-${location}'
       skuName: 'Standard'
     }
     vpnGatewaySettings: {
       deployVpnGateway: false
-      name: 'vgw-alz-${parLocations[0]}'
+      name: 'vgw-alz-${location}'
       skuName: 'VpnGw1AZ'
       vpnMode: 'activeActiveBgp'
       vpnType: 'RouteBased'
@@ -91,22 +94,22 @@ param hubNetworks = [
     }
     expressRouteGatewaySettings: {
       deployExpressRouteGateway: false
-      name: 'ergw-alz-${parLocations[0]}'
+      name: 'ergw-alz-${location}'
     }
     privateDnsSettings: {
       deployPrivateDnsZones: false
       deployDnsPrivateResolver: false
-      privateDnsResolverName: 'dnspr-alz-${parLocations[0]}'
+      privateDnsResolverName: 'dnspr-alz-${location}'
       privateDnsZones: []
     }
     ddosProtectionPlanSettings: {
       deployDdosProtectionPlan: false
-      name: 'ddos-alz-${parLocations[0]}'
+      name: 'ddos-alz-${location}'
     }
   }
   {
-    name: 'vnet-alz-${parLocations[1]}'
-    location: parLocations[1]
+    name: 'vnet-alz-${locationSecondary}'
+    location: locationSecondary
     addressPrefixes: [
       '10.1.0.0/22'
     ]
@@ -114,7 +117,7 @@ param hubNetworks = [
     dnsServers: []
     peeringSettings: [
       {
-        remoteVirtualNetworkName: 'vnet-alz-${parLocations[0]}'
+        remoteVirtualNetworkName: 'vnet-alz-${location}'
         allowForwardedTraffic: true
         allowGatewayTransit: false
         allowVirtualNetworkAccess: true
@@ -151,23 +154,23 @@ param hubNetworks = [
     ]
     azureFirewallSettings: {
       deployAzureFirewall: false
-      azureFirewallName: 'afw-alz-${parLocations[1]}'
+      azureFirewallName: 'afw-alz-${locationSecondary}'
       azureSkuTier: 'Standard'
       publicIPAddressObject: {
-        name: 'pip-afw-alz-${parLocations[1]}'
+        name: 'pip-afw-alz-${locationSecondary}'
       }
       managementIPAddressObject: {
-        name: 'pip-afw-mgmt-alz-${parLocations[1]}'
+        name: 'pip-afw-mgmt-alz-${locationSecondary}'
       }
     }
     bastionHostSettings: {
       deployBastion: false
-      bastionHostSettingsName: 'bas-alz-${parLocations[1]}'
+      bastionHostSettingsName: 'bas-alz-${locationSecondary}'
       skuName: 'Standard'
     }
     vpnGatewaySettings: {
       deployVpnGateway: false
-      name: 'vgw-alz-${parLocations[1]}'
+      name: 'vgw-alz-${locationSecondary}'
       skuName: 'VpnGw1AZ'
       vpnMode: 'activeActiveBgp'
       vpnType: 'RouteBased'
@@ -175,12 +178,12 @@ param hubNetworks = [
     }
     expressRouteGatewaySettings: {
       deployExpressRouteGateway: false
-      name: 'ergw-alz-${parLocations[1]}'
+      name: 'ergw-alz-${locationSecondary}'
     }
     privateDnsSettings: {
       deployPrivateDnsZones: false
       deployDnsPrivateResolver: false
-      privateDnsResolverName: 'dnspr-alz-${parLocations[1]}'
+      privateDnsResolverName: 'dnspr-alz-${locationSecondary}'
       privateDnsZones: [
         'privatelink.{regionName}.azurecontainerapps.io'
         'privatelink.{regionName}.kusto.windows.net'

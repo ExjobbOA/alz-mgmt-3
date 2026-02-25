@@ -1,18 +1,26 @@
 using '../../../../platform/templates/core/governance/mgmt-groups/int-root/main.bicep'
 
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+var mgRootId          = readEnvironmentVariable('MANAGEMENT_GROUP_ID')
+var subIdMgmt         = readEnvironmentVariable('SUBSCRIPTION_ID_MANAGEMENT')
+var securityEmail     = readEnvironmentVariable('SECURITY_CONTACT_EMAIL', '')
+var rgLogging         = 'rg-alz-logging-${location}'
+var lawName           = 'law-alz-${location}'
+var lawResourceId     = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.OperationalInsights/workspaces/${lawName}'
 
-
-// General Parameters
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param intRootConfig = {
   createOrUpdateManagementGroup: true
-  managementGroupName: 'alz'
-  managementGroupParentId: '3aadcd6c-3c4c-49bc-a9d5-57b7fbf31db7'
+  managementGroupName: intRootMgId
+  managementGroupParentId: mgRootId
   managementGroupDisplayName: 'Azure Landing Zones'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -30,28 +38,27 @@ param intRootConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
 param parPolicyAssignmentParameterOverrides = {
   'Deploy-MDFC-Config-H224': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: lawResourceId
       }
       emailSecurityContact: {
-        value: 'security@yourcompany.com'
+        value: securityEmail
       }
       ascExportResourceGroupName: {
-        value: 'rg-alz-asc-${parLocations[0]}'
+        value: 'rg-alz-asc-${location}'
       }
       ascExportResourceGroupLocation: {
-        value: parLocations[0]
+        value: location
       }
     }
   }
   'Deploy-AzActivity-Log': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: lawResourceId
       }
       logsEnabled: {
         value: 'True'
@@ -61,18 +68,18 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-Diag-LogsCat': {
     parameters: {
       logAnalytics: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: lawResourceId
       }
     }
   }
   'Deploy-SvcHealth-BuiltIn': {
     parameters: {
       resourceGroupLocation: {
-        value: parLocations[0]
+        value: location
       }
       actionGroupResources: {
         value: {
-          actionGroupEmail: ['triage@yourcompany.com']
+          actionGroupEmail: [securityEmail]
           eventHubResourceId: []
           functionResourceId: ''
           functionTriggerUrl: ''
@@ -86,7 +93,7 @@ param parPolicyAssignmentParameterOverrides = {
   'Deploy-AzSqlDb-Auditing': {
     parameters: {
       logAnalyticsWorkspaceResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourcegroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/law-alz-${parLocations[0]}'
+        value: lawResourceId
       }
     }
   }

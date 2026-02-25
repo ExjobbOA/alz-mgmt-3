@@ -1,16 +1,19 @@
 using '../../../platform/templates/networking/virtualwan/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
 param parTags = {}
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 param parGlobalResourceLock = {
   name: 'GlobalResourceLock'
   kind: 'None'
-  notes: 'This lock was created by the ALZ Bicep Accelerator.'
+  notes: 'This lock was created by the ALZ Bicep Hub Networking Module.'
 }
 
 // Resource Group Parameters
@@ -20,8 +23,8 @@ param parDnsPrivateResolverResourceGroupNamePrefix = 'rg-alz-dnspr'
 
 // Virtual WAN Parameters
 param vwan = {
-  name: 'vwan-alz-${parLocations[0]}'
-  location: parLocations[0]
+  name: 'vwan-alz-${location}'
+  location: location
   type: 'Standard'
   allowBranchToBranchTraffic: true
   lock: {
@@ -34,30 +37,30 @@ param vwan = {
 // Virtual WAN Hub Parameters
 param vwanHubs = [
   {
-    hubName: 'vhub-alz-${parLocations[0]}'
-    location: parLocations[0]
+    hubName: 'vhub-alz-${location}'
+    location: location
     addressPrefix: '10.0.0.0/22'
     allowBranchToBranchTraffic: true
     preferredRoutingGateway: 'ExpressRoute'
     azureFirewallSettings: {
       deployAzureFirewall: true
-      name: 'afw-alz-${parLocations[0]}'
+      name: 'afw-alz-${location}'
     }
     expressRouteGatewaySettings: {
       deployExpressRouteGateway: true
-      name: 'ergw-alz-${parLocations[0]}'
+      name: 'ergw-alz-${location}'
       minScaleUnits: 1
       maxScaleUnits: 1
       allowNonVirtualWanTraffic: false
     }
     s2sVpnGatewaySettings: {
       deployS2sVpnGateway: false
-      name: 's2s-alz-${parLocations[0]}'
+      name: 's2s-alz-${location}'
       scaleUnit: 1
     }
     p2sVpnGatewaySettings: {
       deployP2sVpnGateway: false
-      name: 'p2s-alz-${parLocations[0]}'
+      name: 'p2s-alz-${location}'
       scaleUnit: 1
       vpnServerConfiguration: {
         vpnAuthenticationTypes: ['AAD']
@@ -68,21 +71,21 @@ param vwanHubs = [
     }
     ddosProtectionPlanSettings: {
       deployDdosProtectionPlan: true
-      name: 'ddos-alz-${parLocations[0]}'
+      name: 'ddos-alz-${location}'
       tags: {}
     }
     dnsSettings: {
       deployPrivateDnsZones: true
       deployDnsPrivateResolver: true
-      privateDnsResolverName: 'dnspr-alz-${parLocations[0]}'
+      privateDnsResolverName: 'dnspr-alz-${location}'
     }
     bastionSettings: {
       deployBastion: true
-      name: 'bas-alz-${parLocations[0]}'
+      name: 'bas-alz-${location}'
       sku: 'Standard'
     }
     sideCarVirtualNetwork: {
-      name: 'vnet-sidecar-alz-${parLocations[0]}'
+      name: 'vnet-sidecar-alz-${location}'
       sidecarVirtualNetworkEnabled: true
       addressPrefixes: [
         '10.0.4.0/22'
@@ -90,30 +93,30 @@ param vwanHubs = [
     }
   }
   {
-    hubName: 'vhub-alz-${parLocations[1]}'
-    location: parLocations[1]
+    hubName: 'vhub-alz-${locationSecondary}'
+    location: locationSecondary
     addressPrefix: '10.1.0.0/22'
     allowBranchToBranchTraffic: true
     preferredRoutingGateway: 'ExpressRoute'
     azureFirewallSettings: {
       deployAzureFirewall: true
-      name: 'afw-alz-${parLocations[1]}'
+      name: 'afw-alz-${locationSecondary}'
     }
     expressRouteGatewaySettings: {
       deployExpressRouteGateway: true
-      name: 'ergw-alz-${parLocations[1]}'
+      name: 'ergw-alz-${locationSecondary}'
       minScaleUnits: 1
       maxScaleUnits: 1
       allowNonVirtualWanTraffic: false
     }
     s2sVpnGatewaySettings: {
       deployS2sVpnGateway: false
-      name: 's2s-alz-${parLocations[1]}'
+      name: 's2s-alz-${locationSecondary}'
       scaleUnit: 1
     }
     p2sVpnGatewaySettings: {
       deployP2sVpnGateway: false
-      name: 'p2s-alz-${parLocations[1]}'
+      name: 'p2s-alz-${locationSecondary}'
       scaleUnit: 1
       vpnServerConfiguration: {
         vpnAuthenticationTypes: ['AAD']
@@ -128,7 +131,7 @@ param vwanHubs = [
     dnsSettings: {
       deployPrivateDnsZones: true
       deployDnsPrivateResolver: true
-      privateDnsResolverName: 'dnspr-alz-${parLocations[1]}'
+      privateDnsResolverName: 'dnspr-alz-${locationSecondary}'
       privateDnsZones: [
         'privatelink.{regionName}.azurecontainerapps.io'
         'privatelink.{regionName}.kusto.windows.net'
@@ -139,11 +142,11 @@ param vwanHubs = [
     }
     bastionSettings: {
       deployBastion: true
-      name: 'bas-alz-${parLocations[1]}'
+      name: 'bas-alz-${locationSecondary}'
       sku: 'Standard'
     }
     sideCarVirtualNetwork: {
-      name: 'vnet-sidecar-alz-${parLocations[1]}'
+      name: 'vnet-sidecar-alz-${locationSecondary}'
       sidecarVirtualNetworkEnabled: true
       addressPrefixes: [
         '10.1.4.0/22'
@@ -151,5 +154,3 @@ param vwanHubs = [
     }
   }
 ]
-
-

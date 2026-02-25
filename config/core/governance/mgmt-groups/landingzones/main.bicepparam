@@ -1,17 +1,36 @@
 using '../../../../../platform/templates/core/governance/mgmt-groups/landingzones/main.bicep'
 
-// General Parameters
+var location                    = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary           = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry             = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId                 = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+var subIdMgmt                   = readEnvironmentVariable('SUBSCRIPTION_ID_MANAGEMENT')
+var subIdConn                   = readEnvironmentVariable('SUBSCRIPTION_ID_CONNECTIVITY')
+var rgLogging                   = 'rg-alz-logging-${location}'
+var rgConn                      = 'rg-alz-conn-${location}'
+var lawName                     = 'law-alz-${location}'
+var uamiName                    = 'uami-alz-${location}'
+var dcrChangeTracking           = 'dcr-alz-changetracking-${location}'
+var dcrVmInsights               = 'dcr-alz-vminsights-${location}'
+var dcrMdfcSql                  = 'dcr-alz-mdfcsql-${location}'
+var lawResourceId               = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.OperationalInsights/workspaces/${lawName}'
+var uamiResourceId              = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${uamiName}'
+var dcrChangeTrackingResourceId = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.Insights/dataCollectionRules/${dcrChangeTracking}'
+var dcrVmInsightsResourceId     = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.Insights/dataCollectionRules/${dcrVmInsights}'
+var dcrMdfcSqlResourceId        = '/subscriptions/${subIdMgmt}/resourceGroups/${rgLogging}/providers/Microsoft.Insights/dataCollectionRules/${dcrMdfcSql}'
+var ddosResourceId              = '/subscriptions/${subIdConn}/resourceGroups/${rgConn}/providers/Microsoft.Network/ddosProtectionPlans/ddos-alz-${location}'
+
 param parLocations = [
-  'swedencentral'
-  'northeurope'
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param landingZonesConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'landingzones'
-  managementGroupParentId: 'alz'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupParentId: intRootMgId
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Landing Zones'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -29,86 +48,85 @@ param landingZonesConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
 param parPolicyAssignmentParameterOverrides = {
   'Enable-DDoS-VNET': {
     parameters: {
       ddosPlan: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-conn-${parLocations[0]}/providers/Microsoft.Network/ddosProtectionPlans/ddos-alz-${parLocations[0]}'
+        value: ddosResourceId
       }
     }
   }
   'Deploy-AzSqlDb-Auditing': {
     parameters: {
       logAnalyticsWorkspaceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/log-alz-${parLocations[0]}'
+        value: lawResourceId
       }
     }
   }
   'Deploy-vmArc-ChangeTrack': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-changetracking-${parLocations[0]}'
+        value: dcrChangeTrackingResourceId
       }
     }
   }
   'Deploy-VM-ChangeTrack': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-changetracking-${parLocations[0]}'
+        value: dcrChangeTrackingResourceId
       }
       userAssignedIdentityResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami-alz-${parLocations[0]}'
+        value: uamiResourceId
       }
     }
   }
   'Deploy-VMSS-ChangeTrack': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-changetracking-${parLocations[0]}'
+        value: dcrChangeTrackingResourceId
       }
       userAssignedIdentityResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami-alz-${parLocations[0]}'
+        value: uamiResourceId
       }
     }
   }
   'Deploy-vmHybr-Monitoring': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-vminsights-${parLocations[0]}'
+        value: dcrVmInsightsResourceId
       }
     }
   }
   'Deploy-VM-Monitoring': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-vminsights-${parLocations[0]}'
+        value: dcrVmInsightsResourceId
       }
       userAssignedIdentityResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami-alz-${parLocations[0]}'
+        value: uamiResourceId
       }
     }
   }
   'Deploy-VMSS-Monitoring': {
     parameters: {
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-vminsights-${parLocations[0]}'
+        value: dcrVmInsightsResourceId
       }
       userAssignedIdentityResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami-alz-${parLocations[0]}'
+        value: uamiResourceId
       }
     }
   }
   'Deploy-MDFC-DefSQL-AMA': {
     parameters: {
       userWorkspaceResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.OperationalInsights/workspaces/log-alz-${parLocations[0]}'
+        value: lawResourceId
       }
       dcrResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.Insights/dataCollectionRules/dcr-alz-mdfcsql-${parLocations[0]}'
+        value: dcrMdfcSqlResourceId
       }
       userAssignedIdentityResourceId: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-logging-${parLocations[0]}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uami-alz-${parLocations[0]}'
+        value: uamiResourceId
       }
     }
   }

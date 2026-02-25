@@ -1,17 +1,21 @@
 using '../../../../../../platform/templates/core/governance/mgmt-groups/platform/platform-management/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+
 param parLocations = [
-  'swedencentral'
-  'northeurope'
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param platformManagementConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'management'
   managementGroupParentId: 'platform'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Management'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -29,7 +33,4 @@ param platformManagementConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
-param parPolicyAssignmentParameterOverrides = {
-  // No policy assignments in platform-management currently
-}
+param parPolicyAssignmentParameterOverrides = {}

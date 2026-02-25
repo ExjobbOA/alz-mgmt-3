@@ -1,17 +1,24 @@
 using '../../../../../../platform/templates/core/governance/mgmt-groups/platform/platform-connectivity/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+var subIdConn         = readEnvironmentVariable('SUBSCRIPTION_ID_CONNECTIVITY')
+var rgConn            = 'rg-alz-conn-${location}'
+var ddosResourceId    = '/subscriptions/${subIdConn}/resourceGroups/${rgConn}/providers/Microsoft.Network/ddosProtectionPlans/ddos-alz-${location}'
+
 param parLocations = [
-  'swedencentral'
-  'northeurope'
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param platformConnectivityConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'connectivity'
   managementGroupParentId: 'platform'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Connectivity'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -20,7 +27,7 @@ param platformConnectivityConfig = {
   customerPolicyDefs: []
   customerPolicySetDefs: []
   customerPolicyAssignments: []
-  subscriptionsToPlaceInManagementGroup: ['6f051987-3995-4c82-abb3-90ba101a0ab4']
+  subscriptionsToPlaceInManagementGroup: [subIdConn]
   waitForConsistencyCounterBeforeCustomPolicyDefinitions: 10
   waitForConsistencyCounterBeforeCustomPolicySetDefinitions: 10
   waitForConsistencyCounterBeforeCustomRoleDefinitions: 10
@@ -29,12 +36,11 @@ param platformConnectivityConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 40
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
 param parPolicyAssignmentParameterOverrides = {
   'Enable-DDoS-VNET': {
     parameters: {
       ddosPlan: {
-        value: '/subscriptions/6f051987-3995-4c82-abb3-90ba101a0ab4/resourceGroups/rg-alz-conn-${parLocations[0]}/providers/Microsoft.Network/ddosProtectionPlans/ddos-alz-${parLocations[0]}'
+        value: ddosResourceId
       }
     }
   }

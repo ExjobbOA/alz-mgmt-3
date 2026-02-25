@@ -1,17 +1,21 @@
 using '../../../../../../platform/templates/core/governance/mgmt-groups/landingzones/landingzones-online/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param landingZonesOnlineConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'online'
   managementGroupParentId: 'landingzones'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Online'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -29,8 +33,4 @@ param landingZonesOnlineConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Currently no policy assignments for online landing zones
-// When policies are added, specify parameter overrides here
-param parPolicyAssignmentParameterOverrides = {
-  // No policy assignments in platform-security currently
-}
+param parPolicyAssignmentParameterOverrides = {}

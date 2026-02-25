@@ -1,17 +1,21 @@
 using '../../../../../platform/templates/core/governance/mgmt-groups/sandbox/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param sandboxConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'sandbox'
-  managementGroupParentId: 'alz'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupParentId: intRootMgId
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Sandbox'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -29,7 +33,4 @@ param sandboxConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
-param parPolicyAssignmentParameterOverrides = {
-  // Currently no common parameter overrides needed, but can be added here
-}
+param parPolicyAssignmentParameterOverrides = {}

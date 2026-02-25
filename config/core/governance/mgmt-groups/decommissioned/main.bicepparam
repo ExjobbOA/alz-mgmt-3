@@ -1,17 +1,21 @@
 using '../../../../../platform/templates/core/governance/mgmt-groups/decommissioned/main.bicep'
 
-// General Parameters
+var location          = readEnvironmentVariable('LOCATION_PRIMARY')
+var locationSecondary = readEnvironmentVariable('LOCATION_SECONDARY', '')
+var enableTelemetry   = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
+var intRootMgId       = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+
 param parLocations = [
-  'swedencentral'
-  ''
+  location
+  locationSecondary
 ]
-param parEnableTelemetry = true
+param parEnableTelemetry = enableTelemetry
 
 param decommissionedConfig = {
   createOrUpdateManagementGroup: true
   managementGroupName: 'decommissioned'
-  managementGroupParentId: 'alz'
-  managementGroupIntermediateRootName: 'alz'
+  managementGroupParentId: intRootMgId
+  managementGroupIntermediateRootName: intRootMgId
   managementGroupDisplayName: 'Decommissioned'
   managementGroupDoNotEnforcePolicyAssignments: []
   managementGroupExcludedPolicyAssignments: []
@@ -29,7 +33,4 @@ param decommissionedConfig = {
   waitForConsistencyCounterBeforeSubPlacement: 10
 }
 
-// Only specify the parameters you want to override - others will use defaults from JSON files
-param parPolicyAssignmentParameterOverrides = {
-  // Add parameter overrides here if needed for customization
-}
+param parPolicyAssignmentParameterOverrides = {}
