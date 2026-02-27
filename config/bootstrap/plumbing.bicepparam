@@ -3,7 +3,7 @@
 using '../../platform/bootstrap/plumbing/main.bicep'
 
 @description('Subscription where the identity RG + UAMIs will be created (e.g. management subscription).')
-param bootstrapSubscriptionId = '<BOOTSTRAP_SUBSCRIPTION_ID>'
+param bootstrapSubscriptionId = '0fbc92c2-828a-4fff-917c-487bf299d344'
 
 @description('Region for identity resources.')
 param location = 'swedencentral'
@@ -12,7 +12,7 @@ param location = 'swedencentral'
 param githubOrg = 'ExjobbOA'
 
 @description('Customer/config repo name (THIS repo name in GitHub). Change if your customer repo is renamed.')
-param moduleRepo = 'alz-mgmt'
+param moduleRepo = 'alz-mgmt-3'
 
 @description('Templates/engine repo name (where reusable workflows live).')
 param templatesRepo = 'alz-mgmt-templates'
