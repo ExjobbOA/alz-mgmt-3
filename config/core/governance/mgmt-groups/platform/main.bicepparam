@@ -4,7 +4,11 @@ var location                    = readEnvironmentVariable('LOCATION_PRIMARY')
 var locationSecondary           = readEnvironmentVariable('LOCATION_SECONDARY', '')
 var enableTelemetry             = bool(readEnvironmentVariable('ENABLE_TELEMETRY', 'true'))
 var intRootMgId                 = readEnvironmentVariable('INTERMEDIATE_ROOT_MANAGEMENT_GROUP_ID')
+var platformMode                = readEnvironmentVariable('PLATFORM_MODE', 'full')
 var subIdMgmt                   = readEnvironmentVariable('SUBSCRIPTION_ID_MANAGEMENT')
+var subIdPlatform               = readEnvironmentVariable('SUBSCRIPTION_ID_PLATFORM', '')
+var includeSubMgPolicies        = platformMode == 'simple'
+var platformSubscriptions       = (platformMode == 'simple' && subIdPlatform != '') ? [subIdPlatform] : []
 var rgLogging                   = 'rg-alz-logging-${location}'
 var lawName                     = 'law-alz-${location}'
 var uamiName                    = 'uami-alz-${location}'
@@ -22,6 +26,7 @@ param parLocations = [
   locationSecondary
 ]
 param parEnableTelemetry = enableTelemetry
+param parIncludeSubMgPolicies = includeSubMgPolicies
 
 param platformConfig = {
   createOrUpdateManagementGroup: true
@@ -36,7 +41,7 @@ param platformConfig = {
   customerPolicyDefs: []
   customerPolicySetDefs: []
   customerPolicyAssignments: []
-  subscriptionsToPlaceInManagementGroup: []
+  subscriptionsToPlaceInManagementGroup: platformSubscriptions
   waitForConsistencyCounterBeforeCustomPolicyDefinitions: 10
   waitForConsistencyCounterBeforeCustomPolicySetDefinitions: 10
   waitForConsistencyCounterBeforeCustomRoleDefinitions: 10
