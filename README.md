@@ -1,2 +1,2 @@
 # alz-mgmt
-Versionshanterad IaC - Oskar Granlöf & Alen Fazlagi
+Versionshanterad IaC - Oskar Granlöf & Alen Fazlagic
