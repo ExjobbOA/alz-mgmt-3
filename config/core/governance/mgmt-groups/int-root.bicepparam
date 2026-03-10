@@ -97,10 +97,13 @@ param parPolicyAssignmentParameterOverrides = {
       }
     }
   }
+  // Without a deployed DDoS Protection Plan the Modify effect injects the plan resource ID
+  // into every VNet and fails with LinkedAuthorizationFailed. Set to Audit until a real plan
+  // exists. When deployDdosProtectionPlan is set to true, change effect back to Modify.
   'Enable-DDoS-VNET': {
     parameters: {
       effect: {
-        value: 'Disabled'
+        value: 'Audit'
       }
     }
   }
