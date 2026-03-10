@@ -49,11 +49,18 @@ param landingZonesConfig = {
 }
 
 param parPolicyAssignmentParameterOverrides = {
+  // Without a deployed DDoS Protection Plan the Modify effect injects the plan resource ID
+  // into every VNet and fails with LinkedAuthorizationFailed. Set to Audit until a real plan
+  // exists. When deployDdosProtectionPlan is set to true, change effect back to Modify and
+  // uncomment the ddosPlan override so the correct plan ID is injected.
   'Enable-DDoS-VNET': {
     parameters: {
-      ddosPlan: {
-        value: ddosResourceId
+      effect: {
+        value: 'Audit'
       }
+      // ddosPlan: {
+      //   value: ddosResourceId
+      // }
     }
   }
   'Deploy-AzSqlDb-Auditing': {
