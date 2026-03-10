@@ -97,4 +97,11 @@ param parPolicyAssignmentParameterOverrides = {
       }
     }
   }
+  'Enable-DDoS-VNET': {
+    parameters: {
+      effect: {
+        value: 'Disabled'
+      }
+    }
+  }
 }
